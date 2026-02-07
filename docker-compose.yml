@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ssi-wallet-mysql
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-ssi_wallet}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_USER: ${DB_USER:-ssi_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ssipassword}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backend/src/database/schema_mysql.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - ssi-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ssi-wallet-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 8080
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-ssi_wallet}
+      DB_USER: ${DB_USER:-ssi_user}
+      DB_PASSWORD: ${DB_PASSWORD:-ssipassword}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - ssi-network
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+
+networks:
+  ssi-network:
+    driver: bridge

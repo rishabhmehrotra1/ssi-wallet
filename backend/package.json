@@ -1,0 +1,55 @@
+{
+    "name": "ssi-wallet-backend",
+    "version": "1.0.0",
+    "description": "Self-Sovereign Identity Personal Data Wallet - Backend API",
+    "main": "src/server.js",
+    "scripts": {
+        "start": "node src/server.js",
+        "dev": "nodemon src/server.js",
+        "test": "jest --coverage",
+        "test:watch": "jest --watch",
+        "test:integration": "jest --testPathPattern=tests/integration",
+        "docker:build": "docker build -t ssi-wallet-backend ."
+    },
+    "keywords": [
+        "ssi",
+        "did",
+        "verifiable-credentials",
+        "decentralized-identity"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@noble/ed25519": "^2.0.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "express-rate-limit": "^7.1.5",
+        "express-validator": "^7.0.1",
+        "helmet": "^7.1.0",
+        "jsonwebtoken": "^9.0.2",
+        "mysql2": "^3.16.3",
+        "pino": "^8.17.2",
+        "pino-http": "^9.0.0",
+        "prom-client": "^15.1.0",
+        "tweetnacl": "^1.0.3",
+        "tweetnacl-util": "^0.15.1",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "nodemon": "^3.0.2",
+        "supertest": "^6.3.3"
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "coverageDirectory": "coverage",
+        "collectCoverageFrom": [
+            "src/**/*.js",
+            "!src/server.js"
+        ],
+        "testMatch": [
+            "**/tests/**/*.test.js"
+        ]
+    }
+}
