@@ -47,6 +47,21 @@ services:
       - ssi-network
     restart: unless-stopped
 
+  frontend:
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile
+        args:
+          - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8080/api}
+      container_name: ssi-wallet-frontend
+      ports:
+        - "3000:80"
+      depends_on:
+        - backend
+      networks:
+        - ssi-network
+      restart: unless-stopped
+
 volumes:
   mysql-data:
 

@@ -1,6 +1,29 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+// Determine API base URL based on environment
+// In development: use localhost:8080
+// In production: use REACT_APP_API_URL (must be set in Netlify environment variables)
+const getApiBaseUrl = () => {
+    // If explicitly set, use it (required for production)
+    if (process.env.REACT_APP_API_URL) {
+        return process.env.REACT_APP_API_URL;
+    }
+
+    // In development, use localhost:8080
+    if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+        return 'http://localhost:8080/api';
+    }
+
+    // In production, REACT_APP_API_URL must be set
+    // This should be the full URL to your backend API
+    // e.g., https://your-backend-domain.com/api
+    console.error('REACT_APP_API_URL is not set. Please set it in Netlify environment variables.');
+    // Return a placeholder that will cause obvious errors
+    // This prevents silent failures and makes debugging easier
+    return 'MISSING_API_URL';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -25,10 +48,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Only handle 401 errors (authentication failures)
+        // Clear token but don't redirect - let components handle navigation
         if (error.response?.status === 401) {
             // Token expired or invalid
             localStorage.removeItem('jwt_token');
-            window.location.href = '/login';
         }
         return Promise.reject(error);
     }

@@ -35,18 +35,36 @@ const allowedOrigins = [
     'https://ssi-wallet-1770467216.netlify.app'
 ].filter(Boolean);
 
+// Support Netlify preview deployments (wildcard pattern)
+const netlifyPattern = /^https:\/\/.*\.netlify\.app$/;
+
 const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+
+        // Check if origin is in allowed list
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         }
+
+        // Check if origin matches Netlify pattern (for preview deployments)
+        if (netlifyPattern.test(origin)) {
+            return callback(null, true);
+        }
+
+        // In development, allow all origins for easier testing
+        if (process.env.NODE_ENV === 'development') {
+            return callback(null, true);
+        }
+
+        // Reject if not allowed
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions));
 
